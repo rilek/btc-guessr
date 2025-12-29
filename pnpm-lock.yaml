@@ -65,10 +65,10 @@ importers:
   functions/api:
     dependencies:
       '@aws-sdk/client-dynamodb':
-        specifier: ^3.955.0
+        specifier: ^3.958.0
         version: 3.958.0
       '@aws-sdk/lib-dynamodb':
-        specifier: ^3.956.0
+        specifier: ^3.958.0
         version: 3.958.0(@aws-sdk/client-dynamodb@3.958.0)
       typescript:
         specifier: ^5

@@ -31,10 +31,6 @@ export default $config({
       handler: handlerPath("players.post"),
     });
 
-    api.route("GET /ticker", {
-      handler: handlerPath("ticker.get"),
-    });
-
     api.route("POST /guess", {
       handler: handlerPath("guess.post"),
     });
@@ -43,9 +39,19 @@ export default $config({
       handler: handlerPath("guess.resolve.post"),
     });
 
-    new sst.aws.React("Frontend", {
+    api.route("GET /ticker", {
+      handler: handlerPath("ticker.get"),
+    });
+
+    new sst.aws.StaticSite("Frontend", {
       path: "apps/frontend",
-      link: [api],
+      build: {
+        command: "pnpm build",
+        output: "apps/frontend/dist",
+      },
+      environment: {
+        VITE_API_URL: api.url,
+      },
     });
   },
 });

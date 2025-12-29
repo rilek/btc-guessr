@@ -10,7 +10,7 @@ declare module "sst" {
       "url": string
     }
     "Frontend": {
-      "type": "sst.aws.React"
+      "type": "sst.aws.StaticSite"
       "url": string
     }
     "PlayerTable": {
