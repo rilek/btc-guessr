@@ -1,0 +1,17 @@
+{
+  "name": "@btc-guessr/api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.159"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.955.0",
+    "@aws-sdk/lib-dynamodb": "^3.956.0",
+    "zod": "^4.2.1"
+  }
+}
