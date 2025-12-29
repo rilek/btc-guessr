@@ -80,6 +80,9 @@ importers:
       '@types/aws-lambda':
         specifier: 8.10.159
         version: 8.10.159
+      '@types/node':
+        specifier: ^24.10.4
+        version: 24.10.4
 
 packages:
 

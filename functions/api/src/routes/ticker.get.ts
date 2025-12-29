@@ -1,6 +1,6 @@
+import { getBTCPrice } from "@/third-party/binance";
+import { response } from "@/utils";
+
 export const handler = async () => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: "Hello World!" }),
-  };
+  return response(200, { price: await getBTCPrice() });
 };
