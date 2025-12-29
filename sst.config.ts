@@ -19,8 +19,16 @@ export default $config({
       primaryIndex: { hashKey: "playerId" },
     });
 
+    const guessTable = new sst.aws.Dynamo("GuessTable", {
+      fields: {
+        guessId: "string",
+        playerId: "string",
+      },
+      primaryIndex: { hashKey: "guessId", rangeKey: "playerId" },
+    });
+
     const api = new sst.aws.ApiGatewayV2("API", {
-      link: [playerTable],
+      link: [playerTable, guessTable],
     });
 
     api.route("GET /players/{id}", {

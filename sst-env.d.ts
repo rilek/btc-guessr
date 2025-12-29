@@ -13,6 +13,10 @@ declare module "sst" {
       "type": "sst.aws.StaticSite"
       "url": string
     }
+    "GuessTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
     "PlayerTable": {
       "name": string
       "type": "sst.aws.Dynamo"
