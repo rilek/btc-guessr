@@ -5,15 +5,11 @@
 
 declare module "sst" {
   export interface Resource {
-    "API": {
+    "Api": {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
-    "Frontend": {
-      "type": "sst.aws.StaticSite"
-      "url": string
-    }
-    "GuessTable": {
+    "PlayersTable": {
       "name": string
       "type": "sst.aws.Dynamo"
     }
