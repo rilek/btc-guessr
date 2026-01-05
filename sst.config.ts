@@ -31,18 +31,22 @@ export default $config({
 
     api.route("POST /players", {
       handler: handlerPath("players.post"),
+      environment: { PLAYERS_TABLE_NAME: playersTable.name },
     });
 
     api.route("GET /players/{playerId}", {
       handler: handlerPath("players.get"),
+      environment: { PLAYERS_TABLE_NAME: playersTable.name },
     });
 
     api.route("POST /players/{playerId}/guess", {
       handler: handlerPath("players.guess.post"),
+      environment: { PLAYERS_TABLE_NAME: playersTable.name },
     });
 
     api.route("POST /players/{playerId}/guess/resolve", {
       handler: handlerPath("players.guess.resolve.post"),
+      environment: { PLAYERS_TABLE_NAME: playersTable.name },
     });
 
     api.route("GET /ticker", {
