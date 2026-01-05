@@ -3,9 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "test": "vitest"
+  },
   "devDependencies": {
     "@types/aws-lambda": "8.10.159",
-    "@types/node": "^24.10.4"
+    "@types/node": "^24.10.4",
+    "vitest": "^4.0.16"
   },
   "peerDependencies": {
     "typescript": "^5"
