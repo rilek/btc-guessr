@@ -7,6 +7,7 @@ import {
   makeGuess,
   type PendingGuess,
   type Player,
+  type ResolvedGuess,
   resolveGuess,
 } from "../api";
 
@@ -22,36 +23,51 @@ interface PlayerState {
   resolveGuess(): Promise<void>;
 }
 
+const canPlayerPlay = (player: Player) =>
+  player.guesses.every((guess) => guess.status === "resolved");
+
+const getPlayerScore = (player: Player) =>
+  player.guesses.reduce((acc, g) => {
+    if (g.status === "pending") return acc;
+
+    return g.outcome === "win" ? acc + 1 : acc;
+  }, 0);
+
+const getPendingGuess = (player: Player) =>
+  player.guesses.find((g) => g.status === "pending") || null;
+
+const appendPlayerGuess = (player: Player, guess: Guess) => ({
+  ...player,
+  guesses: [...player.guesses, guess],
+});
+
+const resolvePlayerGuess = (player: Player, resolvedGuess: ResolvedGuess) => ({
+  ...player,
+  guesses: player.guesses.map((g) =>
+    g.guessId === resolvedGuess.guessId ? resolvedGuess : g,
+  ),
+});
+
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set) => ({
       player: null,
       loading: false,
       canPlay: (): boolean => {
-        const state = usePlayerStore.getState();
-
-        return !!state.player?.guesses.every(
-          (guess) => guess.status === "resolved",
-        ) as boolean;
+        const { player } = usePlayerStore.getState();
+        return !!player && canPlayerPlay(player);
       },
       getScore: (): number => {
-        const player = usePlayerStore.getState().player;
-        if (!player) return 0;
+        const { player } = usePlayerStore.getState();
 
-        return player.guesses.reduce((acc, g) => {
-          if (g.status === "pending") return acc;
-          return g.outcome === "win" ? acc + 1 : acc;
-        }, 0);
+        return player ? getPlayerScore(player) : 0;
       },
       getPendingGuess: () => {
-        const player = usePlayerStore.getState().player;
+        const { player } = usePlayerStore.getState();
         if (!player) return null;
 
-        const pendingGuess = player.guesses.find(
-          (g) => g.status === "pending",
-        ) as PendingGuess | undefined;
-
-        return pendingGuess || null;
+        const guess = getPendingGuess(player);
+        return guess as PendingGuess | null;
       },
       makeGuess: async (direction) => {
         const { player } = usePlayerStore.getState();
@@ -59,12 +75,7 @@ export const usePlayerStore = create<PlayerState>()(
 
         const pendingGuess = await makeGuess(player.playerId, direction);
 
-        set({
-          player: {
-            ...player,
-            guesses: [...player.guesses, pendingGuess],
-          },
-        });
+        set({ player: appendPlayerGuess(player, pendingGuess) });
       },
       fetchPlayer: async () => {
         const playerId = usePlayerStore.getState().player?.playerId;
@@ -75,20 +86,11 @@ export const usePlayerStore = create<PlayerState>()(
         set({ player });
       },
       resolveGuess: async () => {
-        const playerId = usePlayerStore.getState().player?.playerId;
-        if (!playerId) throw new Error("Player not found");
-        const resolvedGuess = await resolveGuess(playerId);
+        const { player } = usePlayerStore.getState();
+        if (!player) throw new Error("Player not found");
+        const resolvedGuess = await resolveGuess(player.playerId);
 
-        set(({ player }) => ({
-          player: player
-            ? {
-                ...player,
-                guesses: player.guesses.map((g) =>
-                  g.guessId === resolvedGuess.guessId ? resolvedGuess : g,
-                ),
-              }
-            : null,
-        }));
+        set({ player: resolvePlayerGuess(player, resolvedGuess) });
       },
     }),
 
