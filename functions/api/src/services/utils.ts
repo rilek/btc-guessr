@@ -1,3 +1,8 @@
+export type Deps = {
+  db: typeof import("../db");
+  binance: typeof import("../third-party/binance");
+};
+
 export const resultData = <T>(data: T) =>
   ({
     data,

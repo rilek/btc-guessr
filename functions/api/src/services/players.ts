@@ -1,28 +1,20 @@
-import { updatePlayer } from "@/db";
 import {
   PendingGuessSchema,
   PlayerSchema,
   ResolvedGuessSchema,
 } from "@/db/schema";
-import type {
-  DB,
-  Guess,
-  PendingGuess,
-  Player,
-  ResolvedGuess,
-} from "@/db/types";
-import { getBTCPrice } from "@/third-party/binance";
-import { type Result, resultData, resultError } from "./utils";
+import type { Guess, PendingGuess, Player, ResolvedGuess } from "@/db/types";
+import { type Deps, type Result, resultData, resultError } from "./utils";
 
 export const getPlayer = async (
-  db: DB,
+  { db }: Deps,
   playerId: Player["playerId"],
 ): Promise<Result<Player | null>> => {
   if (!playerId) return resultError(`Missing playerId parameter`);
   return resultData(await db.getPlayer(playerId));
 };
 
-export const createPlayer = async (db: DB) => {
+export const createPlayer = async ({ db }: Deps) => {
   const playerId = await db.createPlayer();
   const player = await db.getPlayer(playerId);
 
@@ -52,7 +44,7 @@ const hasPendingStatus = (player: Player): boolean =>
   player.guesses.some(({ status }) => status === "pending");
 
 export const makeGuess = async (
-  db: DB,
+  { db, binance }: Deps,
   playerId: Player["playerId"],
   direction: Guess["direction"],
 ): Promise<Result<PendingGuess>> => {
@@ -65,7 +57,9 @@ export const makeGuess = async (
   if (hasPendingStatus(player))
     return resultError(`Player already has a pending guess`);
 
-  await db.updatePlayer(appendGuess(player, direction, await getBTCPrice()));
+  await db.updatePlayer(
+    appendGuess(player, direction, await binance.getBTCPrice()),
+  );
 
   const updatedPlayer = await db.getPlayer(playerId);
 
@@ -112,7 +106,7 @@ const makeGuessResolved = (
 };
 
 export const resolveGuess = async (
-  db: DB,
+  { db, binance }: Deps,
   playerId: Player["playerId"],
 ): Promise<Result<ResolvedGuess>> => {
   if (!playerId) return resultError(`Missing playerId parameter`);
@@ -128,9 +122,11 @@ export const resolveGuess = async (
   if (Date.now() - new Date(pendingGuess.createdAt).getTime() < pendingTimeDiff)
     return resultError("Pending guess cooldown not passed yet");
 
-  const currentPrice = await getBTCPrice();
+  const currentPrice = await binance.getBTCPrice();
 
-  updatePlayer(makeGuessResolved(player, pendingGuess.guessId, currentPrice));
+  db.updatePlayer(
+    makeGuessResolved(player, pendingGuess.guessId, currentPrice),
+  );
 
   const updatedPlayer = await db.getPlayer(playerId);
   if (!updatedPlayer) return resultError("Failed to retrieve updated player");

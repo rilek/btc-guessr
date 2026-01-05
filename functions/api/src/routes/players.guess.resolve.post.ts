@@ -1,12 +1,11 @@
 import type { LambdaFunctionURLHandler } from "aws-lambda";
-import * as db from "@/db";
 import { resolveGuess } from "@/services/players";
-import { response } from "./utils";
+import { deps, response } from "./utils";
 
 export const handler: LambdaFunctionURLHandler = async (event) => {
   const { playerId } = event.pathParameters || {};
 
-  const result = await resolveGuess(db, playerId as string);
+  const result = await resolveGuess(deps, playerId as string);
 
   if (result.error) return response(400, { error: result.error });
 
